@@ -9,6 +9,20 @@
       },
       "hash": "00ea1db636b464b1475990e00c131cc74ce1e58c"
     },
+    "com.cysharp.unitask": {
+      "version": "ssh://git@github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "f0d2ee2beb1075d767fc36ae0fdf61fb68235573"
+    },
+    "com.kyubuns.animetask": {
+      "version": "ssh://git@github.com/kyubuns/AnimeTask.git?path=Assets/AnimeTask",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "2843ce870db259921570e7ddd1c969c7f7213823"
+    },
     "com.unity.2d.animation": {
       "version": "3.2.2",
       "depth": 0,

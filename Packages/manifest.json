@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "com.acegikmo.shapes": "ssh://git@github.com/acegikmo/Shapes.git",
+    "com.cysharp.unitask": "ssh://git@github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+    "com.kyubuns.animetask": "ssh://git@github.com/kyubuns/AnimeTask.git?path=Assets/AnimeTask",
     "com.unity.2d.animation": "3.2.2",
     "com.unity.2d.pixel-perfect": "2.0.4",
     "com.unity.2d.psdimporter": "2.1.4",
