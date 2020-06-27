@@ -1,9 +1,38 @@
 using System;
+using System.Linq;
 using AnimeTask;
 using UnityEngine;
 
 namespace ShapeTest
 {
+    public class DisposableGameObjectList : IDisposable
+    {
+        public GameObject[] GameObjects { get; }
+
+        public DisposableGameObjectList(Vector3[] positions)
+        {
+            GameObjects = positions.Select(x =>
+            {
+                var gameObject = new GameObject();
+                gameObject.transform.localPosition = x;
+                return gameObject;
+            }).ToArray();
+        }
+
+        public T[] AddComponent<T>() where T : Component
+        {
+            return GameObjects.Select(x => x.AddComponent<T>()).ToArray();
+        }
+
+        public void Dispose()
+        {
+            foreach (var gameObject in GameObjects)
+            {
+                UnityEngine.Object.Destroy(gameObject);
+            }
+        }
+    }
+
     public class DisposableGameObject : IDisposable
     {
         public GameObject GameObject { get; }
