@@ -1,5 +1,4 @@
-﻿using System;
-using AnimeTask;
+﻿using AnimeTask;
 using Cysharp.Threading.Tasks;
 using Shapes;
 using UnityEditor;
@@ -13,109 +12,74 @@ namespace ShapeTest
 
         public void Start()
         {
-            Animation().Forget();
+            Wrap().Forget();
         }
 
-        private async UniTask Animation()
+        private async UniTask Wrap()
         {
             while (true)
             {
                 Debug.Log("Main Start");
 
                 await Anime.Delay(0.1f);
-                using (var discObject = new DisposableGameObject())
-                {
-                    var disc = discObject.AddComponent<Disc>();
-                    disc.Type = Disc.DiscType.Arc;
-
-                    const float duration = 3f;
-                    await UniTask.WhenAll(
-                        Anime.Play(
-                            Easing.Create<Linear>(-10f, 10f, duration),
-                            TranslateTo.LocalPositionX(discObject.GameObject)
-                        ),
-                        Anime.Play(
-                            MyEasing.Create<InOutCirc>(
-                                new Vector3(0f, 0f, 0f),
-                                new Vector3(2.5f, 2.5f, 2.5f),
-                                new Vector3(0f, 0f, 0f),
-                                duration),
-                            TranslateTo.LocalScale(discObject.GameObject)
-                        ),
-                        Anime.Play(
-                            Easing.Create<Linear>(-Mathf.PI, Mathf.PI, duration),
-                            TranslateTo.Action<float>(x => disc.AngRadiansStart = x)
-                        )
-                    );
-                }
+                await Animation();
 
                 if (playOnce) break;
             }
             EditorApplication.isPlaying = false;
         }
-    }
 
-    public class DisposableGameObject : IDisposable
-    {
-        public GameObject GameObject { get; }
-
-        public DisposableGameObject(string gameObjectName = "go")
+        private async UniTask Animation()
         {
-            GameObject = new GameObject(gameObjectName);
-        }
+            const float startPi = -Mathf.PI / 2f;
 
-        public T AddComponent<T>() where T : Component
-        {
-            return GameObject.AddComponent<T>();
-        }
-
-        public void Dispose()
-        {
-            UnityEngine.Object.Destroy(GameObject);
-        }
-    }
-
-    public static class MyEasing
-    {
-        public static Vector3EasingAnimatorMid Create<T>(Vector3 start, Vector3 mid, Vector3 end, float duration) where T : IEasing, new()
-        {
-            return new Vector3EasingAnimatorMid(new T(), start, mid, end, duration);
-        }
-    }
-
-    public class Vector3EasingAnimatorMid : IAnimator<Vector3>
-    {
-        private readonly IEasing easing;
-        private readonly Vector3 start;
-        private readonly Vector3 mid;
-        private readonly Vector3 end;
-        private readonly float duration;
-
-        public Vector3EasingAnimatorMid(IEasing easing, Vector3 start, Vector3 mid, Vector3 end, float duration)
-        {
-            this.easing = easing;
-            this.start = start;
-            this.mid = mid;
-            this.end = end;
-            this.duration = duration;
-        }
-
-        public void Start()
-        {
-        }
-
-        public Tuple<Vector3, bool> Update(float time)
-        {
-            var t = Mathf.Min(time / duration, 1f);
-            if (t < 0.5f)
+            using (var discObject1 = new DisposableGameObject(new Vector3(-4.5f, 0f)))
+            using (var discObject2 = new DisposableGameObject(new Vector3(-1.5f, 0f)))
+            using (var discObject3 = new DisposableGameObject(new Vector3(1.5f, 0f)))
+            using (var discObject4 = new DisposableGameObject(new Vector3(4.5f, 0f)))
             {
-                t = t * 2f;
-                return Tuple.Create(Vector3.LerpUnclamped(start, mid, easing.Function(t)), time > (double) duration);
-            }
-            else
-            {
-                t = (t - 0.5f) * 2f;
-                return Tuple.Create(Vector3.LerpUnclamped(mid, end, easing.Function(t)), time > (double) duration);
+                Disc CreateDisc(DisposableGameObject parent)
+                {
+                    var disc = parent.AddComponent<Disc>();
+                    disc.Type = Disc.DiscType.Arc;
+                    disc.Radius = 0.7f;
+                    disc.Thickness = 0.3f;
+                    disc.AngRadiansStart = startPi;
+                    disc.AngRadiansEnd = startPi;
+                    disc.Color = new Color32(255, 242, 173, 255);
+                    return disc;
+                }
+
+                var disc1 = CreateDisc(discObject1);
+                var disc2 = CreateDisc(discObject2);
+                var disc3 = CreateDisc(discObject3);
+                var disc4 = CreateDisc(discObject4);
+
+                async UniTask Anime1(Disc disc, float delay)
+                {
+                    await Anime.Delay(delay);
+
+                    await Anime.Play(
+                        Easing.Create<OutSine>(startPi, startPi - Mathf.PI * 2f, 0.5f),
+                        TranslateTo.Action<float>(x => disc.AngRadiansStart = x)
+                    );
+
+                    await Anime.Delay(1f);
+
+                    await Anime.Play(
+                        Easing.Create<InCubic>(0f, -7f, 0.5f),
+                        TranslateTo.LocalPositionY(disc.gameObject)
+                    );
+                }
+
+                await UniTask.WhenAll(
+                    Anime1(disc1, 0.0f),
+                    Anime1(disc2, 0.25f),
+                    Anime1(disc3, 0.50f),
+                    Anime1(disc4, 0.75f)
+                );
+
+                await Anime.Delay(0.5f);
             }
         }
     }
