@@ -1,5 +1,14 @@
 {
   "dependencies": {
+    "com.acegikmo.shapes": {
+      "version": "ssh://git@github.com/acegikmo/Shapes.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.textmeshpro": "1.4.1"
+      },
+      "hash": "00ea1db636b464b1475990e00c131cc74ce1e58c"
+    },
     "com.unity.2d.animation": {
       "version": "3.2.2",
       "depth": 0,
