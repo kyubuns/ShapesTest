@@ -1,18 +1,27 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using AnimeTask;
+using Cysharp.Threading.Tasks;
+using Shapes;
 using UnityEngine;
 
-public class Sample : MonoBehaviour
+namespace ShapeTest
 {
-    // Start is called before the first frame update
-    void Start()
+    public class Sample : MonoBehaviour
     {
-        
-    }
+        public void Start()
+        {
+            Animation().Forget();
+        }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        private async UniTask Animation()
+        {
+            Debug.Log("Main Start");
+            var discObject = new GameObject("Disc1");
+            var disc = discObject.AddComponent<Disc>();
+            disc.Type = Disc.DiscType.Disc;
+
+            await Anime.Delay(1.0f);
+
+        }
     }
 }
+
