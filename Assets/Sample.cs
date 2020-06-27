@@ -2,12 +2,15 @@
 using AnimeTask;
 using Cysharp.Threading.Tasks;
 using Shapes;
+using UnityEditor;
 using UnityEngine;
 
 namespace ShapeTest
 {
     public class Sample : MonoBehaviour
     {
+        [SerializeField] private bool playOnce = false;
+
         public void Start()
         {
             Animation().Forget();
@@ -42,7 +45,10 @@ namespace ShapeTest
                 );
 
                 Destroy(discObject);
+
+                if (playOnce) break;
             }
+            EditorApplication.isPlaying = false;
         }
 
         private static async UniTask Play(params Func<UniTask>[] tasks)
