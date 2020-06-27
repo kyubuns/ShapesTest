@@ -23,39 +23,55 @@ namespace ShapeTest
                 Debug.Log("Main Start");
 
                 await Anime.Delay(0.1f);
-                var discObject = new GameObject("Disc1");
-                var disc = discObject.AddComponent<Disc>();
-                disc.Type = Disc.DiscType.Ring;
+                using (var discObject = new DisposableGameObject())
+                {
+                    var disc = discObject.AddComponent<Disc>();
+                    disc.Type = Disc.DiscType.Arc;
 
-                const float duration = 3f;
-                await UniTask.WhenAll(
-                    Anime.Play(
-                        Easing.Create<Linear>(-10f, 10f, duration),
-                        TranslateTo.LocalPositionX(discObject)
-                    ),
-                    Anime.Play(
-                        MyEasing.Create<InOutCirc>(
-                            new Vector3(0f, 0f, 0f),
-                            new Vector3(2.5f, 2.5f, 2.5f),
-                            new Vector3(0f, 0f, 0f),
-                            duration),
-                        TranslateTo.LocalScale(discObject)
-                    )
-                );
-
-                Destroy(discObject);
+                    const float duration = 3f;
+                    await UniTask.WhenAll(
+                        Anime.Play(
+                            Easing.Create<Linear>(-10f, 10f, duration),
+                            TranslateTo.LocalPositionX(discObject.GameObject)
+                        ),
+                        Anime.Play(
+                            MyEasing.Create<InOutCirc>(
+                                new Vector3(0f, 0f, 0f),
+                                new Vector3(2.5f, 2.5f, 2.5f),
+                                new Vector3(0f, 0f, 0f),
+                                duration),
+                            TranslateTo.LocalScale(discObject.GameObject)
+                        ),
+                        Anime.Play(
+                            Easing.Create<Linear>(-Mathf.PI, Mathf.PI, duration),
+                            TranslateTo.Action<float>(x => disc.AngRadiansStart = x)
+                        )
+                    );
+                }
 
                 if (playOnce) break;
             }
             EditorApplication.isPlaying = false;
         }
+    }
 
-        private static async UniTask Play(params Func<UniTask>[] tasks)
+    public class DisposableGameObject : IDisposable
+    {
+        public GameObject GameObject { get; }
+
+        public DisposableGameObject(string gameObjectName = "go")
         {
-            foreach (var task in tasks)
-            {
-                await task();
-            }
+            GameObject = new GameObject(gameObjectName);
+        }
+
+        public T AddComponent<T>() where T : Component
+        {
+            return GameObject.AddComponent<T>();
+        }
+
+        public void Dispose()
+        {
+            UnityEngine.Object.Destroy(GameObject);
         }
     }
 
