@@ -26,7 +26,7 @@ namespace ShapeTest
             {
                 Debug.Log("Main Start");
 
-                await GravityTest();
+                await LineTest();
 
                 if (playOnce) break;
             }
@@ -230,6 +230,56 @@ namespace ShapeTest
                     x => new Vector3(Mathf.Sin(x), Mathf.Cos(x), 0.0f) * 3.0f),
                 TranslateTo.LocalPosition(go)
             );
+        }
+
+        private async UniTask LineTest()
+        {
+            var taskList = new List<UniTask>();
+            for(var i = 0; i < 100; ++i)
+            {
+                taskList.Add(LineTestElement());
+                await UniTask.Delay(30);
+            }
+
+            await UniTask.WhenAll(taskList);
+        }
+
+        private async UniTask LineTestElement()
+        {
+            var colors = new[]
+            {
+                // 114
+                new Color32(78, 191, 214, 255),
+                new Color32(0, 85, 149, 255),
+                new Color32(25, 36, 74, 255),
+                new Color32(87, 189, 168, 255),
+                new Color32(246, 249, 228, 255),
+                new Color32(0, 0, 0, 255),
+                new Color32(162, 67, 137, 255),
+                new Color32(229, 230, 71, 255),
+            };
+            using (var shapeObject = new DisposableGameObject(
+                new Vector3(Random.Range(-8f, 8f), Random.Range(-8f, 8f), 50f)
+            ))
+            {
+                var shape = shapeObject.AddComponent<Line>();
+                shape.Geometry = LineGeometry.Volumetric3D;
+                shape.Color = colors[Random.Range(0, colors.Length)];
+                shape.Start = new Vector3(0f, 0f, 0f);
+                shape.End = new Vector3(0f, 0f, Random.Range(4f, 10f));
+                shape.Thickness = 0.25f;
+
+                await UniTask.WhenAll(
+                    Anime.PlayTo(
+                        Easing.Create<OutCubic>(-20f, Random.Range(1f, 3f)),
+                        TranslateTo.LocalPositionZ(shape)
+                    ),
+                    Anime.Play(
+                        Easing.Create<InCubic>(Vector3.zero, Vector3.one, 0.15f),
+                        TranslateTo.LocalScale(shape)
+                    )
+                );
+            }
         }
     }
 }
