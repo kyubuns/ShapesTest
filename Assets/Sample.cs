@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AnimeTask;
 using Cysharp.Threading.Tasks;
@@ -25,7 +26,7 @@ namespace ShapeTest
             {
                 Debug.Log("Main Start");
 
-                await ExplosionTest();
+                await GravityTest();
 
                 if (playOnce) break;
             }
@@ -120,11 +121,14 @@ namespace ShapeTest
 
         private static async UniTask GravityTest()
         {
-            while (true)
+            var taskList = new List<UniTask>();
+            for(var i = 0; i < 20; ++i)
             {
-                AnimationElement().Forget();
+                taskList.Add(AnimationElement());
                 await UniTask.Delay(100);
             }
+
+            await UniTask.WhenAll(taskList);
         }
 
         private static async UniTask AnimationElement()
@@ -141,7 +145,7 @@ namespace ShapeTest
                 const float yrangeMin = 5f;
                 const float yrangeMax = 10f;
                 await Anime.PlayTo(
-                    Moving.Gravity(new Vector3(Random.Range(-xrange, xrange), Random.Range(yrangeMin, yrangeMax)), Vector3.down * 9.8f, 5f),
+                    Moving.Gravity(new Vector3(Random.Range(-xrange, xrange), Random.Range(yrangeMin, yrangeMax)), Vector3.down * 9.8f, 3f),
                     TranslateTo.LocalPosition(shape)
                 );
             }
@@ -188,6 +192,44 @@ namespace ShapeTest
                     )
                 );
             }
+        }
+
+        private async UniTask CircleTest()
+        {
+            using (var shapeObjects = new DisposableGameObjectList(new[]
+            {
+                new Vector3(0f, 3f, 0f),
+                new Vector3(0f, 3f, 0f),
+                new Vector3(0f, 3f, 0f)
+            }))
+            {
+                var shapes = shapeObjects.AddComponent<Disc>().Select(shape =>
+                {
+                    shape.Type = Disc.DiscType.Ring;
+                    shape.Color = new Color32(255, 242, 173, 255);
+                    shape.Radius = 0.3f;
+                    shape.Thickness = 0.1f;
+                    return shape;
+                }).ToArray();
+
+                await Anime.Delay(1f);
+
+                await UniTask.WhenAll(
+                    CircleTestElement(shapes[0], 0.0f),
+                    CircleTestElement(shapes[1], 0.2f),
+                    CircleTestElement(shapes[2], 0.4f)
+                );
+            }
+        }
+
+        private async UniTask CircleTestElement(Component go, float delay)
+        {
+            await Anime.Delay(delay);
+            await Anime.Play(
+                Animator.Convert(Easing.Create<OutCubic>(0.0f, Mathf.PI * 2.0f, 2f),
+                    x => new Vector3(Mathf.Sin(x), Mathf.Cos(x), 0.0f) * 3.0f),
+                TranslateTo.LocalPosition(go)
+            );
         }
     }
 }
