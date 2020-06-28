@@ -1,9 +1,12 @@
-﻿using AnimeTask;
+﻿using System;
+using System.Linq;
+using AnimeTask;
 using Cysharp.Threading.Tasks;
 using Shapes;
 using UnityEditor;
 using UnityEngine;
 using Animator = AnimeTask.Animator;
+using Random = UnityEngine.Random;
 
 namespace ShapeTest
 {
@@ -22,7 +25,7 @@ namespace ShapeTest
             {
                 Debug.Log("Main Start");
 
-                await Sample2();
+                await ExplosionTest();
 
                 if (playOnce) break;
             }
@@ -143,6 +146,48 @@ namespace ShapeTest
                 );
             }
         }
+
+        private static async UniTask ExplosionTest()
+        {
+            await UniTask.WhenAll(Enumerable.Range(0, 50).Select(x => ExplosionTestElement()));
+        }
+
+        private static async UniTask ExplosionTestElement()
+        {
+            using (var shapeObjects = new DisposableGameObject(Vector3.zero))
+            {
+                var shape = shapeObjects.AddComponent<Disc>();
+                shape.Type = Disc.DiscType.Ring;
+                shape.Color = new Color32(255, 242, 173, 255);
+                shape.Radius = 0.3f;
+                shape.Thickness = 0.1f;
+
+                const float rangeMin = 1f;
+                const float rangeMax = 3f;
+                var v = Random.insideUnitCircle.normalized * Random.Range(rangeMin, rangeMax);
+
+                const float duration = 1f;
+                const float eraseDuration = 0.5f;
+                await Anime.Delay(0.5f);
+                await UniTask.WhenAll(
+                    Anime.PlayTo(
+                        Easing.Create<OutExpo>(
+                            new Vector3(v.x, v.y, 0f),
+                            duration
+                        ),
+                        TranslateTo.LocalPosition(shape)
+                    ),
+                    Anime.Play(
+                        Animator.Delay(duration - eraseDuration - 0.3f, Easing.Create<Linear>(1f, 0f, eraseDuration)),
+                        TranslateTo.Action<float>(x =>
+                        {
+                            var tmp = shape.Color;
+                            tmp.a = x;
+                            shape.Color = tmp;
+                        })
+                    )
+                );
+            }
+        }
     }
 }
-
