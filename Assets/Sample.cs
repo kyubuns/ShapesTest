@@ -13,6 +13,7 @@ namespace ShapeTest
 {
     public class Sample : MonoBehaviour
     {
+        [SerializeField] private Camera targetCamera = default;
         [SerializeField] private bool playOnce = false;
 
         public void Start()
@@ -26,7 +27,7 @@ namespace ShapeTest
             {
                 Debug.Log("Main Start");
 
-                await Tweet1();
+                await LineTest();
 
                 if (playOnce) break;
             }
@@ -352,6 +353,7 @@ namespace ShapeTest
 
         private async UniTask LineTest()
         {
+            targetCamera.backgroundColor = new Color32(221, 241, 252, 255);
             var taskList = new List<UniTask>();
             for(var i = 0; i < 100; ++i)
             {
