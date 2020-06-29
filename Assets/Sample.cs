@@ -3,7 +3,9 @@ using System.Linq;
 using AnimeTask;
 using Cysharp.Threading.Tasks;
 using Shapes;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using Animator = AnimeTask.Animator;
 using Random = UnityEngine.Random;
@@ -30,7 +32,9 @@ namespace ShapeTest
 
                 if (playOnce) break;
             }
+#if UNITY_EDITOR
             EditorApplication.isPlaying = false;
+#endif
         }
 
         private static async UniTask Tweet1()
@@ -423,7 +427,7 @@ namespace ShapeTest
         private static async UniTask RandomBoxTest()
         {
             Random.InitState(12345);
-            for (var i = 0; i < 10000; ++i)
+            for (var i = 0; i < 1000; ++i)
             {
                 var shapeObjects = new DisposableGameObject(Vector3.zero);
                 var shape = shapeObjects.AddComponent<Rectangle>();
@@ -436,8 +440,8 @@ namespace ShapeTest
                 shape.transform.localPosition = new Vector2(Random.Range(-5f, 5f), Random.Range(-5f, 5f));
 
                 if (i % 100 == 0) Debug.Log(i);
-                await UniTask.Yield();
             }
+            await UniTask.Delay(1000000000);
         }
     }
 }
