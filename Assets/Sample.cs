@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using AnimeTask;
 using Cysharp.Threading.Tasks;
@@ -27,7 +26,7 @@ namespace ShapeTest
             {
                 Debug.Log("Main Start");
 
-                await LineTest();
+                await RandomBoxTest();
 
                 if (playOnce) break;
             }
@@ -241,7 +240,7 @@ namespace ShapeTest
         private static async UniTask GravityTest()
         {
             var taskList = new List<UniTask>();
-            for(var i = 0; i < 20; ++i)
+            for (var i = 0; i < 20; ++i)
             {
                 taskList.Add(AnimationElement());
                 await UniTask.Delay(100);
@@ -355,7 +354,7 @@ namespace ShapeTest
         {
             targetCamera.backgroundColor = new Color32(221, 241, 252, 255);
             var taskList = new List<UniTask>();
-            for(var i = 0; i < 10000; ++i)
+            for (var i = 0; i < 10000; ++i)
             {
                 for (var j = 0; j < 3; ++j)
                 {
@@ -417,6 +416,27 @@ namespace ShapeTest
                         TranslateTo.LocalScale(shape)
                     )
                 );
+            }
+        }
+
+
+        private static async UniTask RandomBoxTest()
+        {
+            Random.InitState(12345);
+            for (var i = 0; i < 10000; ++i)
+            {
+                var shapeObjects = new DisposableGameObject(Vector3.zero);
+                var shape = shapeObjects.AddComponent<Rectangle>();
+                shape.Type = Rectangle.RectangleType.RoundedHollow;
+                shape.Width = Random.Range(0.2f, 1.5f);
+                shape.Height = Random.Range(0.2f, 1.5f);
+                shape.Color = Random.ColorHSV();
+                shape.Thickness = Random.Range(0.1f, 1.0f);
+
+                shape.transform.localPosition = new Vector2(Random.Range(-5f, 5f), Random.Range(-5f, 5f));
+
+                if (i % 100 == 0) Debug.Log(i);
+                await UniTask.Yield();
             }
         }
     }
