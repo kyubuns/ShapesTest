@@ -355,10 +355,13 @@ namespace ShapeTest
         {
             targetCamera.backgroundColor = new Color32(221, 241, 252, 255);
             var taskList = new List<UniTask>();
-            for(var i = 0; i < 100; ++i)
+            for(var i = 0; i < 10000; ++i)
             {
-                taskList.Add(LineTestElement());
-                await UniTask.Delay(30);
+                for (var j = 0; j < 3; ++j)
+                {
+                    taskList.Add(LineTestElement());
+                }
+                await UniTask.Delay(1);
             }
 
             await UniTask.WhenAll(taskList);
@@ -366,28 +369,43 @@ namespace ShapeTest
 
         private async UniTask LineTestElement()
         {
+            const byte colorA = 64;
+            /*
             var colors = new[]
             {
                 // 114
-                new Color32(78, 191, 214, 255),
-                new Color32(0, 85, 149, 255),
-                new Color32(25, 36, 74, 255),
-                new Color32(87, 189, 168, 255),
-                new Color32(246, 249, 228, 255),
-                new Color32(0, 0, 0, 255),
-                new Color32(162, 67, 137, 255),
-                new Color32(229, 230, 71, 255),
+                new Color32(78, 191, 214, colorA),
+                new Color32(0, 85, 149, colorA),
+                new Color32(25, 36, 74, colorA),
+                new Color32(87, 189, 168, colorA),
+                new Color32(246, 249, 228, colorA),
+                new Color32(0, 0, 0, colorA),
+                new Color32(162, 67, 137, colorA),
+                new Color32(229, 230, 71, colorA),
             };
+            */
+            var colors = new[]
+            {
+                new Color32(255, 0, 0, colorA),
+                new Color32(0, 255, 0, colorA),
+                new Color32(0, 0, 255, colorA),
+                new Color32(255, 255, 0, colorA),
+                new Color32(255, 0, 255, colorA),
+                new Color32(0, 255, 255, colorA),
+            };
+
+            var unitCircle = Random.insideUnitCircle.normalized * Random.Range(2f, 8f);
             using (var shapeObject = new DisposableGameObject(
-                new Vector3(Random.Range(-8f, 8f), Random.Range(-8f, 8f), 50f)
+                new Vector3(unitCircle.x, unitCircle.y, 50f)
             ))
             {
                 var shape = shapeObject.AddComponent<Line>();
                 shape.Geometry = LineGeometry.Volumetric3D;
+                shape.BlendMode = ShapesBlendMode.Additive;
                 shape.Color = colors[Random.Range(0, colors.Length)];
                 shape.Start = new Vector3(0f, 0f, 0f);
                 shape.End = new Vector3(0f, 0f, Random.Range(4f, 10f));
-                shape.Thickness = 0.25f;
+                shape.Thickness = Random.Range(0.1f, 1.0f);
 
                 await UniTask.WhenAll(
                     Anime.PlayTo(
